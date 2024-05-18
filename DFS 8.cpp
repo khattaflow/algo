@@ -1,6 +1,6 @@
 #include <iostream>
 #include <list>
-#include <vector>
+
 using namespace std;
 
 // Graph class representing a directed graph using adjacency list representation
@@ -8,16 +8,16 @@ class Graph {
     int V; // Number of vertices
 
     // Pointer to an array containing adjacency lists
-    vector<list<int>> adj;
+    list<int> *adj;
 
     // Recursive function for DFS
-    void DFSUtil(int v, vector<bool>& visited) {
+    void DFSUtil(int v, bool visited[]) {
         // Mark the current node as visited and print it
         visited[v] = true;
         cout << v << " ";
 
         // Recur for all the vertices adjacent to this vertex
-        for (int u : adj[v]) {
+        for (auto u : adj[v]) {
             if (!visited[u]) {
                 DFSUtil(u, visited);
             }
@@ -28,7 +28,12 @@ public:
     // Constructor
     Graph(int V) {
         this->V = V;
-        adj.resize(V);
+        adj = new list<int>[V];
+    }
+
+    // Destructor
+    ~Graph() {
+        delete[] adj;
     }
 
     // Function to add an edge to the graph
@@ -39,10 +44,15 @@ public:
     // Function to perform depth-first search from a given vertex
     void DFS(int v) {
         // Mark all the vertices as not visited
-        vector<bool> visited(V, false);
+        bool *visited = new bool[V];
+        for (int i = 0; i < V; i++)
+            visited[i] = false;
 
         // Call the recursive helper function to print DFS traversal
         DFSUtil(v, visited);
+
+        // Free allocated memory
+        delete[] visited;
     }
 };
 
@@ -65,4 +75,3 @@ int main() {
 
     return 0;
 }
-
