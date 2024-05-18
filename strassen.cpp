@@ -1,42 +1,31 @@
 #include <iostream>
-#include <vector>
-using namespace std;
 
 // Function to add two matrices
-vector<vector<int>> addMatrix(const vector<vector<int>>& A, const vector<vector<int>>& B) {
-    int n = A.size();
-    vector<vector<int>> C(n, vector<int>(n, 0));
+void addMatrix(int A[4][4], int B[4][4], int C[4][4], int n) {
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
             C[i][j] = A[i][j] + B[i][j];
-    return C;
 }
 
 // Function to subtract two matrices
-vector<vector<int>> subtractMatrix(const vector<vector<int>>& A, const vector<vector<int>>& B) {
-    int n = A.size();
-    vector<vector<int>> C(n, vector<int>(n, 0));
+void subtractMatrix(int A[4][4], int B[4][4], int C[4][4], int n) {
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
             C[i][j] = A[i][j] - B[i][j];
-    return C;
 }
 
 // Function to multiply two matrices using Strassen's algorithm
-vector<vector<int>> strassen(const vector<vector<int>>& A, const vector<vector<int>>& B) {
-    int n = A.size();
-
+void strassen(int A[4][4], int B[4][4], int C[4][4], int n) {
     // Base case: If the matrices are 1x1, perform a simple multiplication
     if (n == 1) {
-        vector<vector<int>> C(1, vector<int>(1, 0));
         C[0][0] = A[0][0] * B[0][0];
-        return C;
+        return;
     }
 
     // Split matrices A and B into quadrants
     int half = n / 2;
-    vector<vector<int>> A11(half, vector<int>(half)), A12(half, vector<int>(half)), A21(half, vector<int>(half)), A22(half, vector<int>(half));
-    vector<vector<int>> B11(half, vector<int>(half)), B12(half, vector<int>(half)), B21(half, vector<int>(half)), B22(half, vector<int>(half));
+    int A11[half][half], A12[half][half], A21[half][half], A22[half][half];
+    int B11[half][half], B12[half][half], B21[half][half], B22[half][half];
 
     for (int i = 0; i < half; i++) {
         for (int j = 0; j < half; j++) {
@@ -53,22 +42,28 @@ vector<vector<int>> strassen(const vector<vector<int>>& A, const vector<vector<i
     }
 
     // Compute intermediate sub-matrices
-    vector<vector<int>> M1 = strassen(addMatrix(A11, A22), addMatrix(B11, B22));
-    vector<vector<int>> M2 = strassen(addMatrix(A21, A22), B11);
-    vector<vector<int>> M3 = strassen(A11, subtractMatrix(B12, B22));
-    vector<vector<int>> M4 = strassen(A22, subtractMatrix(B21, B11));
-    vector<vector<int>> M5 = strassen(addMatrix(A11, A12), B22);
-    vector<vector<int>> M6 = strassen(subtractMatrix(A21, A11), addMatrix(B11, B12));
-    vector<vector<int>> M7 = strassen(subtractMatrix(A12, A22), addMatrix(B21, B22));
+    int M1[half][half], M2[half][half], M3[half][half], M4[half][half], M5[half][half], M6[half][half], M7[half][half];
+    addMatrix(A11, A22, M1, half);
+    addMatrix(B11, B22, M2, half);
+    addMatrix(A21, A22, M3, half);
+    subtractMatrix(B12, B22, M4, half);
+    subtractMatrix(B21, B11, M5, half);
+    addMatrix(A11, A12, M6, half);
+    subtractMatrix(A21, A11, M7, half);
 
     // Compute result sub-matrices
-    vector<vector<int>> C11 = addMatrix(subtractMatrix(addMatrix(M1, M4), M5), M7);
-    vector<vector<int>> C12 = addMatrix(M3, M5);
-    vector<vector<int>> C21 = addMatrix(M2, M4);
-    vector<vector<int>> C22 = addMatrix(subtractMatrix(addMatrix(M1, M3), M2), M6);
+    int C11[half][half], C12[half][half], C21[half][half], C22[half][half];
+    int temp1[half][half], temp2[half][half];
+    addMatrix(M1, M4, temp1, half);
+    subtractMatrix(temp1, M5, temp2, half);
+    addMatrix(temp2, M7, C11, half);
+    addMatrix(M3, M5, C12, half);
+    addMatrix(M2, M4, C21, half);
+    subtractMatrix(M1, M2, temp1, half);
+    addMatrix(temp1, M3, temp2, half);
+    addMatrix(temp2, M6, C22, half);
 
     // Combine result matrices
-    vector<vector<int>> C(n, vector<int>(n));
     for (int i = 0; i < half; i++) {
         for (int j = 0; j < half; j++) {
             C[i][j] = C11[i][j];
@@ -77,44 +72,42 @@ vector<vector<int>> strassen(const vector<vector<int>>& A, const vector<vector<i
             C[i + half][j + half] = C22[i][j];
         }
     }
-
-    return C;
 }
 
 // Function to print a matrix
-void printMatrix(const vector<vector<int>>& matrix) {
-    for (const auto& row : matrix) {
-        for (int val : row) {
-            cout << val << " ";
+void printMatrix(int matrix[4][4], int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            std::cout << matrix[i][j] << " ";
         }
-        cout << endl;
+        std::cout << std::endl;
     }
 }
 
 int main() {
-    vector<vector<int>> A = {{1, 2, 4, 5}, 
-							{3, 4, 7, 8},
-							{9, 8, 1, 10},
-							{13, 14, 15, 16}};
-							
-    vector<vector<int>> B = {{15, 16, 11, 12}, 
-							 {17, 18, 19, 10},
-							 {11, 12, 13, 14},
-							 {16, 17, 19, 20}};
+    int A[4][4] = {{1, 2, 4, 5}, 
+				   {3, 4, 7, 8},
+				   {9, 8, 1, 10},
+				   {13, 14, 15, 16}};
+				   
+    int B[4][4] = {{15, 16, 11, 12}, 
+				   {17, 18, 19, 10},
+				   {11, 12, 13, 14},
+				   {16, 17, 19, 20}};
 
-    cout << "Matrix A:" << endl;
-    printMatrix(A);
-    cout<<endl;
+    std::cout << "Matrix A:" << std::endl;
+    printMatrix(A, 4);
+    std::cout << std::endl;
     
-    cout << "Matrix B:" << endl;
-    printMatrix(B);
-    cout<<endl;
+    std::cout << "Matrix B:" << std::endl;
+    printMatrix(B, 4);
+    std::cout << std::endl;
 
-    vector<vector<int>> C = strassen(A, B);
+    int C[4][4];
+    strassen(A, B, C, 4);
 
-    cout << "Resultant Matrix C:" << endl;
-    printMatrix(C);
+    std::cout << "Resultant Matrix C:" << std::endl;
+    printMatrix(C, 4);
 
     return 0;
 }
-
