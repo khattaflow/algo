@@ -1,7 +1,7 @@
 #include <iostream>
 #include <list>
 #include <queue>
-#include <vector>
+
 using namespace std;
 
 // Graph class representing a directed graph using adjacency list representation
@@ -9,13 +9,18 @@ class Graph {
     int V; // Number of vertices
 
     // Pointer to an array containing adjacency lists
-    vector<list<int>> adj;
+    list<int> *adj;
 
 public:
     // Constructor
     Graph(int V) {
         this->V = V;
-        adj.resize(V);
+        adj = new list<int>[V];
+    }
+
+    // Destructor
+    ~Graph() {
+        delete[] adj;
     }
 
     // Function to add an edge to the graph
@@ -26,7 +31,9 @@ public:
     // Function to perform breadth-first search from a given vertex
     void BFS(int s) {
         // Mark all the vertices as not visited
-        vector<bool> visited(V, false);
+        bool *visited = new bool[V];
+        for (int i = 0; i < V; i++)
+            visited[i] = false;
 
         // Create a queue for BFS
         queue<int> queue;
@@ -45,14 +52,17 @@ public:
             queue.pop();
 
             // Get all adjacent vertices of the dequeued vertex s. If an adjacent 
-			//vertex has not been visited, mark it visited and enqueue it.
-            for (int v : adj[s]) {
-                if (!visited[v]) {
-                    visited[v] = true;
-                    queue.push(v);
+			// vertex has not been visited, mark it visited and enqueue it.
+            for (i = adj[s].begin(); i != adj[s].end(); ++i) {
+                if (!visited[*i]) {
+                    visited[*i] = true;
+                    queue.push(*i);
                 }
             }
         }
+
+        // Free allocated memory
+        delete[] visited;
     }
 };
 
@@ -73,4 +83,3 @@ int main() {
 
     return 0;
 }
-
